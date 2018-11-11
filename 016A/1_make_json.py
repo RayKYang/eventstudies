@@ -20,6 +20,8 @@ convert_table = pd.read_csv('8836874c2a2bcb0d.csv')
 # 3 merge permno with MnA file and output json
 convert_table['Acquiror 6-digit CUSIP'] = convert_table['NCUSIP'].str.slice(0, 6)
 merged = pd.merge(event_file_1[['Acquiror 6-digit CUSIP', 'Date Announced']], convert_table, on=['Acquiror 6-digit CUSIP'], how='inner')
+merged.to_csv("cusip_permno_match.csv", index=False)
+
 output = merged[['PERMNO', 'Date Announced']]
 output.drop_duplicates(keep='first', inplace=True)
 output = output.dropna()
@@ -27,9 +29,8 @@ output = output.dropna()
 output = output.rename(index=str, columns={'Date Announced': 'edate', 'PERMNO': 'permno'})
 output['edate'] = output['edate'].dt.strftime('%m/%d/%Y')
 
+os.chdir("/Volumes/RESEARCH_HD/016/raw_data")
 import json # https://stackoverflow.com/questions/26745519/converting-dictionary-to-json-in-python
 loaded_r = json.loads(json.dumps(output.to_dict('records')))
 with open('data.json', 'w') as outfile:
     json.dump(loaded_r, outfile)
-
-
